@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Food Orders</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      height: 100%;
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 2rem;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem 0;
+      font-weight: 700;
+    }
+    
+    .header p {
+      font-size: 1.1rem;
+      margin: 0;
+      opacity: 0.95;
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card h2 {
+      margin: 0 0 1.5rem 0;
+      color: #2d3748;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .menu-item {
+      background: #f7fafc;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .menu-item:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    
+    .menu-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .menu-item h3 {
+      margin: 0;
+      color: #2d3748;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .menu-item-price {
+      color: #667eea;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    
+    .menu-item p {
+      margin: 0 0 0.75rem 0;
+      color: #718096;
+      font-size: 0.9rem;
+    }
+    
+    .order-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    
+    .order-btn:hover {
+      background: #5568d3;
+    }
+    
+    .order-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+    
+    .order-form {
+      background: #f7fafc;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    
+    .order-form.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .submit-btn {
+      flex: 1;
+      background: #48bb78;
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    
+    .submit-btn:hover {
+      background: #38a169;
+    }
+    
+    .submit-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+    
+    .cancel-btn {
+      flex: 1;
+      background: #e2e8f0;
+      color: #2d3748;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    
+    .cancel-btn:hover {
+      background: #cbd5e0;
+    }
+    
+    .orders-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    
+    .order-card {
+      background: #f7fafc;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .order-card.completed {
+      border-left-color: #48bb78;
+      opacity: 0.7;
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 0.75rem;
+    }
+    
+    .order-info h4 {
+      margin: 0 0 0.25rem 0;
+      color: #2d3748;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .order-info p {
+      margin: 0;
+      color: #718096;
+      font-size: 0.85rem;
+    }
+    
+    .order-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .order-status.pending {
+      background: #fef5e7;
+      color: #d97706;
+    }
+    
+    .order-status.completed {
+      background: #d1fae5;
+      color: #059669;
+    }
+    
+    .order-details {
+      color: #4a5568;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .order-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    
+    .complete-btn {
+      flex: 1;
+      background: #48bb78;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    
+    .complete-btn:hover {
+      background: #38a169;
+    }
+    
+    .complete-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+    
+    .delete-btn {
+      flex: 1;
+      background: #f56565;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    
+    .delete-btn:hover {
+      background: #e53e3e;
+    }
+    
+    .delete-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #718096;
+    }
+    
+    .empty-state p {
+      margin: 0;
+      font-size: 1rem;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .limit-warning {
+      background: #fef5e7;
+      border: 2px solid #f59e0b;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      color: #92400e;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <header class="header">
+    <h1 id="app-title">Teacher Food Orders</h1>
+    <p id="subtitle">Order delicious meals from our culinary program</p>
+   </header>
+   <div class="content-grid">
+    <div class="card">
+     <h2 id="menu-heading">Today's Menu</h2>
+     <div id="menu-container"></div>
+    </div>
+    <div class="card">
+     <h2 id="orders-heading">Current Orders</h2>
+     <div id="limit-warning" class="limit-warning" style="display: none;">
+      Maximum limit of 999 orders reached. Please complete or delete some orders first.
+     </div>
+     <div id="orders-container" class="orders-list"></div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#667eea",
+      surface_color: "#ffffff",
+      text_color: "#2d3748",
+      primary_action_color: "#667eea",
+      secondary_action_color: "#48bb78",
+      font_family: "sans-serif",
+      font_size: 16,
+      app_title: "Teacher Food Orders",
+      subtitle: "Order delicious meals from our culinary program",
+      menu_heading: "Today's Menu",
+      orders_heading: "Current Orders"
+    };
+
+    const menuItems = [
+      {
+        id: "1",
+        name: "Grilled Chicken Caesar Salad",
+        description: "Fresh romaine, grilled chicken, parmesan, croutons",
+        price: "$8.50"
+      },
+      {
+        id: "2",
+        name: "Margherita Pizza",
+        description: "Fresh mozzarella, basil, tomato sauce on homemade dough",
+        price: "$7.00"
+      },
+      {
+        id: "3",
+        name: "Turkey Club Sandwich",
+        description: "Turkey, bacon, lettuce, tomato on toasted bread",
+        price: "$6.50"
+      },
+      {
+        id: "4",
+        name: "Vegetable Stir Fry",
+        description: "Seasonal vegetables with rice and teriyaki sauce",
+        price: "$7.50"
+      },
+      {
+        id: "5",
+        name: "Pasta Primavera",
+        description: "Penne pasta with fresh vegetables and garlic cream sauce",
+        price: "$8.00"
+      }
+    ];
+
+    let currentOrders = [];
+    let activeOrderForm = null;
+    let recordCount = 0;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        currentOrders = data;
+        recordCount = data.length;
+        renderOrders();
+        updateLimitWarning();
+      }
+    };
+
+    async function initializeApp() {
+      const initResult = await window.dataSdk.init(dataHandler);
+      if (!initResult.isOk) {
+        console.error("Failed to initialize data SDK");
+        return;
+      }
+      
+      renderMenu();
+      renderOrders();
+    }
+
+    function renderMenu() {
+      const container = document.getElementById('menu-container');
+      container.innerHTML = '';
+      
+      menuItems.forEach(item => {
+        const menuItemEl = document.createElement('div');
+        menuItemEl.className = 'menu-item';
+        menuItemEl.innerHTML = `
+          <div class="menu-item-header">
+            <h3>${item.name}</h3>
+            <span class="menu-item-price">${item.price}</span>
+          </div>
+          <p>${item.description}</p>
+          <button class="order-btn" onclick="showOrderForm('${item.id}')">Order This</button>
+          <div id="order-form-${item.id}" class="order-form">
+            <form onsubmit="submitOrder(event, '${item.id}')">
+              <div class="form-group">
+                <label for="teacher-name-${item.id}">Your Name</label>
+                <input type="text" id="teacher-name-${item.id}" required>
+              </div>
+              <div class="form-group">
+                <label for="quantity-${item.id}">Quantity</label>
+                <input type="number" id="quantity-${item.id}" min="1" value="1" required>
+              </div>
+              <div class="form-group">
+                <label for="special-requests-${item.id}">Special Requests (Optional)</label>
+                <textarea id="special-requests-${item.id}" placeholder="Any dietary restrictions or modifications?"></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="submit-btn" id="submit-btn-${item.id}">
+                  Place Order
+                </button>
+                <button type="button" class="cancel-btn" onclick="hideOrderForm('${item.id}')">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        `;
+        container.appendChild(menuItemEl);
+      });
+    }
+
+    function showOrderForm(itemId) {
+      if (activeOrderForm) {
+        hideOrderForm(activeOrderForm);
+      }
+      
+      const form = document.getElementById(`order-form-${itemId}`);
+      form.classList.add('active');
+      activeOrderForm = itemId;
+    }
+
+    function hideOrderForm(itemId) {
+      const form = document.getElementById(`order-form-${itemId}`);
+      form.classList.remove('active');
+      
+      const formElement = form.querySelector('form');
+      formElement.reset();
+      
+      if (activeOrderForm === itemId) {
+        activeOrderForm = null;
+      }
+    }
+
+    async function submitOrder(event, itemId) {
+      event.preventDefault();
+      
+      if (recordCount >= 999) {
+        updateLimitWarning();
+        return;
+      }
+      
+      const submitBtn = document.getElementById(`submit-btn-${itemId}`);
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loading-spinner"></span> Placing Order...';
+      
+      const menuItem = menuItems.find(item => item.id === itemId);
+      const teacherName = document.getElementById(`teacher-name-${itemId}`).value;
+      const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
+      const specialRequests = document.getElementById(`special-requests-${itemId}`).value;
+      
+      const orderData = {
+        menu_item_id: itemId,
+        teacher_name: teacherName,
+        item_name: menuItem.name,
+        quantity: quantity,
+        special_requests: specialRequests,
+        order_date: new Date().toISOString(),
+        status: "pending"
+      };
+      
+      const result = await window.dataSdk.create(orderData);
+      
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Place Order';
+      
+      if (result.isOk) {
+        hideOrderForm(itemId);
+      } else {
+        alert('Failed to place order. Please try again.');
+      }
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('orders-container');
+      
+      if (currentOrders.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No orders yet. Place your first order!</p></div>';
+        return;
+      }
+      
+      const sortedOrders = [...currentOrders].sort((a, b) => {
+        if (a.status === 'pending' && b.status === 'completed') return -1;
+        if (a.status === 'completed' && b.status === 'pending') return 1;
+        return new Date(b.order_date) - new Date(a.order_date);
+      });
+      
+      container.innerHTML = '';
+      
+      sortedOrders.forEach(order => {
+        const orderEl = document.createElement('div');
+        orderEl.className = `order-card ${order.status}`;
+        
+        const orderDate = new Date(order.order_date);
+        const formattedDate = orderDate.toLocaleDateString() + ' ' + orderDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        orderEl.innerHTML = `
+          <div class="order-header">
+            <div class="order-info">
+              <h4>${order.item_name}</h4>
+              <p>${order.teacher_name} • ${formattedDate}</p>
+            </div>
+            <span class="order-status ${order.status}">${order.status === 'pending' ? 'Pending' : 'Completed'}</span>
+          </div>
+          <div class="order-details">
+            <strong>Quantity:</strong> ${order.quantity}
+            ${order.special_requests ? `<br><strong>Special Requests:</strong> ${order.special_requests}` : ''}
+          </div>
+          <div class="order-actions">
+            ${order.status === 'pending' ? `
+              <button class="complete-btn" onclick="completeOrder('${order.__backendId}')" id="complete-btn-${order.__backendId}">
+                Mark Complete
+              </button>
+            ` : ''}
+            <button class="delete-btn" onclick="deleteOrder('${order.__backendId}')" id="delete-btn-${order.__backendId}">
+              Delete
+            </button>
+          </div>
+        `;
+        
+        container.appendChild(orderEl);
+      });
+    }
+
+    async function completeOrder(backendId) {
+      const completeBtn = document.getElementById(`complete-btn-${backendId}`);
+      completeBtn.disabled = true;
+      completeBtn.innerHTML = '<span class="loading-spinner"></span>';
+      
+      const order = currentOrders.find(o => o.__backendId === backendId);
+      if (!order) return;
+      
+      const updatedOrder = { ...order, status: "completed" };
+      const result = await window.dataSdk.update(updatedOrder);
+      
+      if (!result.isOk) {
+        completeBtn.disabled = false;
+        completeBtn.textContent = 'Mark Complete';
+        alert('Failed to update order. Please try again.');
+      }
+    }
+
+    async function deleteOrder(backendId) {
+      const deleteBtn = document.getElementById(`delete-btn-${backendId}`);
+      deleteBtn.disabled = true;
+      deleteBtn.innerHTML = '<span class="loading-spinner"></span>';
+      
+      const order = currentOrders.find(o => o.__backendId === backendId);
+      if (!order) return;
+      
+      const result = await window.dataSdk.delete(order);
+      
+      if (!result.isOk) {
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = 'Delete';
+        alert('Failed to delete order. Please try again.');
+      }
+    }
+
+    function updateLimitWarning() {
+      const warning = document.getElementById('limit-warning');
+      if (recordCount >= 999) {
+        warning.style.display = 'block';
+      } else {
+        warning.style.display = 'none';
+      }
+    }
+
+    async function onConfigChange(config) {
+      const appTitle = document.getElementById('app-title');
+      const subtitle = document.getElementById('subtitle');
+      const menuHeading = document.getElementById('menu-heading');
+      const ordersHeading = document.getElementById('orders-heading');
+      
+      appTitle.textContent = config.app_title || defaultConfig.app_title;
+      subtitle.textContent = config.subtitle || defaultConfig.subtitle;
+      menuHeading.textContent = config.menu_heading || defaultConfig.menu_heading;
+      ordersHeading.textContent = config.orders_heading || defaultConfig.orders_heading;
+      
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryActionColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryActionColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+      
+      document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${backgroundColor} 100%)`;
+      
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        card.style.backgroundColor = surfaceColor;
+      });
+      
+      const headers = document.querySelectorAll('.card h2');
+      headers.forEach(header => {
+        header.style.color = textColor;
+        header.style.fontSize = `${fontSize * 1.5}px`;
+      });
+      
+      const menuItemHeaders = document.querySelectorAll('.menu-item h3');
+      menuItemHeaders.forEach(header => {
+        header.style.color = textColor;
+        header.style.fontSize = `${fontSize * 1.1}px`;
+      });
+      
+      const orderButtons = document.querySelectorAll('.order-btn');
+      orderButtons.forEach(btn => {
+        btn.style.backgroundColor = primaryActionColor;
+        btn.style.fontSize = `${fontSize * 0.9}px`;
+      });
+      
+      const submitButtons = document.querySelectorAll('.submit-btn');
+      submitButtons.forEach(btn => {
+        btn.style.backgroundColor = secondaryActionColor;
+        btn.style.fontSize = `${fontSize}px`;
+      });
+      
+      const completeButtons = document.querySelectorAll('.complete-btn');
+      completeButtons.forEach(btn => {
+        btn.style.backgroundColor = secondaryActionColor;
+        btn.style.fontSize = `${fontSize * 0.85}px`;
+      });
+      
+      document.body.style.fontFamily = `${fontFamily}, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+      
+      const headerTitle = document.querySelector('.header h1');
+      const headerSubtitle = document.querySelector('.header p');
+      headerTitle.style.fontSize = `${fontSize * 2.5}px`;
+      headerSubtitle.style.fontSize = `${fontSize * 1.1}px`;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["app_title", config.app_title || defaultConfig.app_title],
+          ["subtitle", config.subtitle || defaultConfig.subtitle],
+          ["menu_heading", config.menu_heading || defaultConfig.menu_heading],
+          ["orders_heading", config.orders_heading || defaultConfig.orders_heading]
+        ])
+      });
+    }
+
+    initializeApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6b8c412836b15',t:'MTc2MjQ1NDQ1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
