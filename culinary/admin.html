@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Food Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  <script src="adminScript.js" defer></script>
+ </head>
+
+ <body>
+  <div class="container">
+   <header class="header">
+    <h1 id="app-title">Teacher Food Orders</h1>
+    <p id="subtitle">Order delicious meals from our culinary program</p>
+   </header><!-- Interface Selection -->
+   <div id="interface-selector" class="interface-selector">
+    <div class="selector-card">
+     <h2>Select Your Interface</h2>
+     <div class="selector-buttons"><button class="selector-btn teacher-btn" onclick="showTeacherInterface()">
+       <div class="btn-icon">
+        👩‍🏫
+       </div>
+       <div class="btn-text">
+        <h3>Teacher</h3>
+        <p>Browse menu &amp; place orders</p>
+       </div></button> <button class="selector-btn culinary-btn" onclick="showCulinaryInterface()">
+       <div class="btn-icon">
+        👨‍🍳
+       </div>
+       <div class="btn-text">
+        <h3>Culinary Teacher</h3>
+        <p>Manage orders &amp; kitchen</p>
+       </div></button>
+     </div>
+    </div>
+   </div><!-- Teacher Interface -->
+   <div id="teacher-interface" class="interface-content" style="display: none;">
+    <div class="interface-header"><button class="back-btn" onclick="showInterfaceSelector()">← Back to Selection</button>
+     <h2 id="menu-heading">Today's Menu</h2>
+    </div>
+    <div class="single-column">
+     <div class="card">
+      <div id="menu-container"></div>
+     </div>
+    </div>
+   </div><!-- Item Detail Interface -->
+   <div id="item-detail-interface" class="interface-content" style="display: none;">
+    <div class="interface-header"><button class="back-btn" onclick="showTeacherInterface()">← Back to Menu</button>
+     <h2 id="item-detail-title">Item Details</h2>
+    </div>
+    <div class="single-column">
+     <div class="card">
+      <div id="item-detail-container"></div>
+     </div>
+    </div>
+   </div><!-- Culinary Interface -->
+   <div id="culinary-interface" class="interface-content" style="display: none;">
+    <div class="interface-header"><button class="back-btn" onclick="showInterfaceSelector()">← Back to Selection</button>
+     <h2 id="orders-heading">Kitchen Orders</h2>
+    </div>
+    <div class="single-column">
+     <div class="card">
+      <div id="orders-container" class="orders-list"></div>
+     </div>
+    </div>
+   </div>
+  </div>
+    
+
+</body>
+</html>
